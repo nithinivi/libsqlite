@@ -29,7 +29,7 @@
     <ClInclude Include="Debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="libsqlite.h">
+    <ClInclude Include="libsqlite.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Crossplatfrom.h">

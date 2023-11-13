@@ -134,7 +134,7 @@
     <ClInclude Include="Crossplatfrom.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="Handle.h" />
-    <ClInclude Include="libsqlite.h" />
+    <ClInclude Include="libsqlite.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
