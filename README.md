@@ -2,7 +2,7 @@
 
 
 The lib can be used in the follow mapper check the libsqlite.cpp file
-```
+```cpp
     Connection connection = Connection::Memory();
 		execute(connection, "create table Users (Name)");
 
