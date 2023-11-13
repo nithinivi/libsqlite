@@ -1,6 +1,6 @@
 # libsqlite
 
-
+Written to learn c++, 
 The lib can be used in the following manner check the libsqlite.cpp file
 ```cpp
 
@@ -15,5 +15,3 @@ The lib can be used in the following manner check the libsqlite.cpp file
 		printf(" %s  \n", row.getString());
 	}
 ```
-
-**note** written learn c++, let me know of the bugs  and shortcomings 
