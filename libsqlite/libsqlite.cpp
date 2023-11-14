@@ -17,7 +17,6 @@ static char const* typeName(Type const type)
 	default:
 		ASSERT(false);
 		return "invalid";
-
 	}
 }
 
@@ -67,6 +66,21 @@ void trasaction()
 
 }
 
+void profile_handling()
+{
+	Connection connection = Connection::Memory();
+	connection.profile(
+		[](void*, char const* const statement, unsigned long long const time) {
+			unsigned long long const ms = time / 1000'000;
+			if (ms > 10)
+			{
+				printf("profiler - (%lld) %s\n", ms, statement);
+			}
+		}
+	);
+}
+
+
 
 int main()
 {
@@ -74,7 +88,7 @@ int main()
 
 	try
 	{
-		trasaction();
+		profile_handling();
 	}
 	catch (const Exception const& e)
 	{
