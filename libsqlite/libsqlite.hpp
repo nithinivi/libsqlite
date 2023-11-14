@@ -6,6 +6,16 @@
 #include "Crossplatfrom.h"
 
 
+enum class Type
+{
+	Integer = SQLITE_INTEGER,
+	Float = SQLITE_FLOAT,
+	Blob = SQLITE_BLOB,
+	Null = SQLITE_NULL,
+	Text = SQLITE_TEXT,
+};
+
+
 struct Exception
 {
 	int Result = 0;
@@ -27,7 +37,7 @@ class Connection
 	{
 		static void Close(Type value) noexcept
 		{
-			VERIFY_(SQLITE_OK, sqlite3_close(value));
+			 sqlite3_close(value);
 		}
 
 	};
@@ -84,6 +94,11 @@ public:
 
 	}
 
+	long long rowId() const noexcept
+	{
+		return sqlite3_last_insert_rowid(getAbi());
+	}
+
 
 	sqlite3* getAbi() const noexcept
 	{
@@ -95,11 +110,19 @@ public:
 	{
 		throw Exception(getAbi());
 	}
+
+	template<typename F>
+	void profile(F callback, void* const context = nullptr)
+	{
+		sqlite3_profile(getAbi(), callback, context);
+	}
+
+
 };
 
 
 template<typename T>
-struct Reader
+struct Reader // curisoly recuring template 
 {
 	int getInt(int const column = 0) const noexcept
 	{
@@ -130,6 +153,11 @@ struct Reader
 		return sqlite3_column_bytes16(
 			static_cast<T const*>(this)->getAbi(), column) / sizeof(wchar_t);
 	}
+
+	Type getType(int const column = 0) const noexcept
+	{
+		return static_cast<Type>(sqlite3_column_type(static_cast<T const*>(this)->getAbi(), column));
+	}
 };
 
 class Row : public Reader<Row>
@@ -148,7 +176,7 @@ public:
 	}
 };
 
-class Statement : public Reader<Statement>  // curisoly recuring template class 
+class Statement : public Reader<Statement>   
 
 {
 	struct StatementHandleTraits : HandleTraits<sqlite3_stmt*>
@@ -321,6 +349,19 @@ public:
 	{
 		internalBind(1, std::forward<V>(values) ...);
 	}
+
+
+	template<typename ...V>
+	void reset(V && ... values) const
+	{
+		if (SQLITE_OK != sqlite3_reset(getAbi()))
+		{
+			throwLastError();
+
+		}
+
+		bindAll(values ...);
+	}
 };
 
 class RowIterator
@@ -379,3 +420,4 @@ void execute(
 {
 	Statement(connection, text, std::forward<Values>(values)...).execute();
 }
+
