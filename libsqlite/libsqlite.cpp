@@ -81,6 +81,30 @@ void profile_handling()
 }
 
 
+static void saveToDisk(Connection const & source, char const * const filename)
+{
+	Connection destination(filename);
+	Backup backup(destination, source);
+	backup.step();
+}
+
+void backup_handling()
+{
+	Connection connection = Connection::Memory();
+	execute(connection, "create table things (content real)");
+	Statement statement(connection, "insert into things values (?)");
+	for (int i = 0; i < 10000; i++)
+	{
+		statement.reset(i);
+		statement.execute();
+	}
+
+	saveToDisk(connection, "C:\\temp\\backup.db");
+
+
+}
+
+
 
 int main()
 {
@@ -88,7 +112,7 @@ int main()
 
 	try
 	{
-		profile_handling();
+		backup_handling();
 	}
 	catch (const Exception const& e)
 	{

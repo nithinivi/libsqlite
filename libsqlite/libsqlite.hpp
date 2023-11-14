@@ -116,6 +116,60 @@ public:
 	{
 		sqlite3_profile(getAbi(), callback, context);
 	}
+};
+
+
+class Backup
+{
+	struct BackupHandleTraits : HandleTraits<sqlite3_backup*>
+	{
+		static void Close(Type value) noexcept
+		{
+			sqlite3_backup_finish(value);
+		}
+	};
+	using BackupHandle = Handle<BackupHandleTraits>;
+	BackupHandle m_handle;
+	Connection const* m_destination = nullptr;
+
+public:
+
+	Backup(
+		Connection const& destination,
+		Connection const& source,
+		char const* const destinationName = "dest",
+		char const* const sourceName = "source") :
+		m_handle(sqlite3_backup_init(
+			destination.getAbi(),
+			destinationName,
+			source.getAbi(),
+			sourceName
+		)),
+		m_destination(&destination)
+	{
+		if (m_handle)
+		{
+			destination.throwLastError();
+		}
+
+	}
+
+	sqlite3_backup* getAbi() const noexcept
+	{
+		return m_handle.get();
+	}
+
+	bool step(int const pages = -1) // -1 all remaing 
+	{
+		int const result = sqlite3_backup_step(getAbi(), pages);
+		if (result == SQLITE_OK) return true;
+		if (result == SQLITE_DONE) return false;
+
+		// if something goes wrong
+		m_handle.reset();
+		m_destination->throwLastError();
+
+	}
 
 
 };
@@ -420,4 +474,3 @@ void execute(
 {
 	Statement(connection, text, std::forward<Values>(values)...).execute();
 }
-
